@@ -9,7 +9,7 @@ Backend for a finance dashboard with REST APIs and role-based access control (RB
 - Financial records CRUD (admin only)
 - Summary/analytics endpoints (income, expense, balance, category totals)
 - Validation + consistent JSON error responses
-- Bonus: JWT minting endpoint for easier Postman testing
+- JWT minting endpoint for easier Postman testing
 
 ## Tech Stack
 
@@ -18,11 +18,11 @@ Backend for a finance dashboard with REST APIs and role-based access control (RB
 - `mysql-connector-python` (DB driver)
 - `flask-cors` (CORS)
 - `python-dotenv` (environment config)
-- `PyJWT` (bonus JWT support)
+- `PyJWT` (JWT support)
 
 ## Project Structure
 
-- `app.py`: Flask app + JSON error handlers + `POST /auth/token` (bonus)
+- `app.py`: Flask app + JSON error handlers + `POST /auth/token` 
 - `db.py`: MySQL connection + `init_db()` table creation
 - `routes/`: REST endpoints
   - `users.py`
@@ -45,7 +45,7 @@ pip install -r requirements.txt
 Update `.env` with your MySQL credentials:
 
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-- `JWT_SECRET` (used to sign tokens in the bonus flow)
+- `JWT_SECRET` (used to sign tokens in the flow)
 
 ### 3. Ensure the database exists
 
@@ -87,7 +87,7 @@ Role capabilities:
 - `analyst`: can view records + analytics (`income`/`expense` only)
 - `viewer`: read-only analytics + records list
 
-## JWT Bonus Flow (for `POST /records`)
+## JWT Flow (for `POST /records`)
 
 `POST /records` requires:
 
@@ -96,7 +96,7 @@ Role capabilities:
 
 JWT is minted via:
 
-### `POST /auth/token` (bonus)
+### `POST /auth/token` 
 
 Header:
 - `role: admin | analyst | viewer`

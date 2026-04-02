@@ -35,7 +35,7 @@ def create_app() -> Flask:
             "dashboard.html",
         )
 
-    # JWT minting endpoint (bonus) for easy Postman testing.
+    # JWT minting endpoint for easy Postman testing.
     @app.post("/auth/token")
     def mint_token():
         role = (request.headers.get("role") or "").strip().lower()
