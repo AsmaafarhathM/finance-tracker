@@ -1,0 +1,586 @@
+{
+  "info": {
+    "name": "Finance Tracker - Combined Scenarios (1 Core, 2 Negative, 3 Edge)",
+    "_postman_id": "d7f4d8dd-0d18-4f4f-9d11-8d9bf8d84755",
+    "description": "Combined collection with 3 folders: 1) Core functional scenarios, 2) Required negative scenarios, 3) Additional edge-case scenarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:5000" },
+    { "key": "admin_email", "value": "asmaa@example.com" },
+    { "key": "admin_token", "value": "" },
+    { "key": "record_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "1) Core Functional Scenarios",
+      "item": [
+        {
+          "name": "01 - Health / Root (optional)",
+          "request": { "method": "GET", "url": "{{base_url}}/" }
+        },
+        {
+          "name": "02 - Create Admin User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Asmaa Admin\",\n  \"email\": \"asmaa@example.com\",\n  \"role\": \"admin\",\n  \"status\": true\n}"
+            },
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "03 - Create Analyst User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Anu Analyst\",\n  \"email\": \"anu@example.com\",\n  \"role\": \"analyst\",\n  \"status\": true\n}"
+            },
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "04 - Create Viewer User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vee Viewer\",\n  \"email\": \"vee@example.com\",\n  \"role\": \"viewer\",\n  \"status\": true\n}"
+            },
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "05 - Get Users (viewer allowed)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "06 - Mint Admin Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {};",
+                  "try { json = pm.response.json(); } catch(e) {}",
+                  "if (json.access_token) {",
+                  "  pm.collectionVariables.set('admin_token', json.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{admin_email}}\"\n}" },
+            "url": "{{base_url}}/auth/token"
+          }
+        },
+        {
+          "name": "07 - Create Income Record (admin + JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 2500,\n  \"type\": \"income\",\n  \"category\": \"Salary\",\n  \"date\": \"2026-04-02\",\n  \"note\": \"April salary\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "08 - Create Expense Record (admin + JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 700,\n  \"type\": \"expense\",\n  \"category\": \"Rent\",\n  \"date\": \"2026-04-02\",\n  \"note\": \"April rent\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "09 - List Records (viewer)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "10 - Update Record (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 2600,\n  \"type\": \"income\",\n  \"category\": \"Salary\",\n  \"date\": \"2026-04-02\",\n  \"note\": \"Updated salary\"\n}"
+            },
+            "url": "{{base_url}}/records/{{record_id}}"
+          }
+        },
+        {
+          "name": "11 - Summary Income (analyst)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "analyst" }],
+            "url": "{{base_url}}/summary/income"
+          }
+        },
+        {
+          "name": "12 - Summary Expense (analyst)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "analyst" }],
+            "url": "{{base_url}}/summary/expense"
+          }
+        },
+        {
+          "name": "13 - Summary Balance (viewer)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/summary/balance"
+          }
+        },
+        {
+          "name": "14 - Summary Category (viewer)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/summary/category"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "2) Required Negative Scenarios",
+      "item": [
+        {
+          "name": "NEG-01 Missing Role Header -> 401",
+          "request": { "method": "GET", "url": "{{base_url}}/users" }
+        },
+        {
+          "name": "NEG-02 Viewer on Summary Income -> 403",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/summary/income"
+          }
+        },
+        {
+          "name": "NEG-03 Analyst Create Record -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "analyst" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"expense\",\n  \"category\": \"Food\",\n  \"date\": \"2026-04-02\",\n  \"note\": \"Should fail\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "NEG-04 Admin Create Record without JWT -> 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"expense\",\n  \"category\": \"Food\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "NEG-05 Invalid amount (0) -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 0,\n  \"type\": \"expense\",\n  \"category\": \"Food\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "NEG-06 Invalid type -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"profit\",\n  \"category\": \"Food\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "NEG-07 Invalid date format -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"expense\",\n  \"category\": \"Food\",\n  \"date\": \"02-04-2026\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "NEG-08 Duplicate email -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicate\",\n  \"email\": \"asmaa@example.com\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "NEG-09 Invalid filter user_id -> 400",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/records?user_id=abc"
+          }
+        },
+        {
+          "name": "NEG-10 Invalid filter type -> 400",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/records?type=profit"
+          }
+        },
+        {
+          "name": "NEG-11 Invalid filter start_date -> 400",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/records?start_date=2026/04/02"
+          }
+        },
+        {
+          "name": "NEG-12 Update missing record -> 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 111,\n  \"type\": \"income\",\n  \"category\": \"Test\",\n  \"date\": \"2026-04-02\",\n  \"note\": \"missing id\"\n}"
+            },
+            "url": "{{base_url}}/records/99999"
+          }
+        },
+        {
+          "name": "NEG-13 Delete missing record -> 404",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "role", "value": "admin" }],
+            "url": "{{base_url}}/records/99999"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "3) Additional Edge Scenarios",
+      "item": [
+        {
+          "name": "EDGE-01 Role header case-insensitive admin -> should pass",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "ADMIN" }],
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "EDGE-02 Role header with spaces -> should pass (normalized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "  admin  " }],
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "EDGE-03 Invalid role value -> forbidden",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "manager" }],
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "EDGE-04 Mint token with invalid role header -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "manager" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{admin_email}}\"\n}" },
+            "url": "{{base_url}}/auth/token"
+          }
+        },
+        {
+          "name": "EDGE-05 Mint token with unknown email -> 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"notfound@example.com\"\n}" },
+            "url": "{{base_url}}/auth/token"
+          }
+        },
+        {
+          "name": "EDGE-06 Mint token role mismatch (analyst header for admin email) -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "analyst" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{admin_email}}\"\n}" },
+            "url": "{{base_url}}/auth/token"
+          }
+        },
+        {
+          "name": "EDGE-07 Create inactive user (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Inactive User\",\n  \"email\": \"inactive@example.com\",\n  \"role\": \"viewer\",\n  \"status\": false\n}"
+            },
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "EDGE-08 Mint token for inactive user -> 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "viewer" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"inactive@example.com\"\n}" },
+            "url": "{{base_url}}/auth/token"
+          }
+        },
+        {
+          "name": "EDGE-09 Create record malformed auth scheme -> 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Token {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"expense\",\n  \"category\": \"Food\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "EDGE-10 Create record with fake token -> 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer this.is.not.valid" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"expense\",\n  \"category\": \"Food\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "EDGE-11 Create record missing category -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"expense\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "EDGE-12 Create record missing note (optional) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 150,\n  \"type\": \"expense\",\n  \"category\": \"Snacks\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records"
+          }
+        },
+        {
+          "name": "EDGE-13 Update record invalid amount type string -> 400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"abc\",\n  \"type\": \"income\",\n  \"category\": \"Salary\",\n  \"date\": \"2026-04-02\",\n  \"note\": \"bad amount\"\n}"
+            },
+            "url": "{{base_url}}/records/{{record_id}}"
+          }
+        },
+        {
+          "name": "EDGE-14 Update record missing required field -> 400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "role", "value": "admin" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 120,\n  \"type\": \"income\",\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{base_url}}/records/{{record_id}}"
+          }
+        },
+        {
+          "name": "EDGE-15 Records filter start_date > end_date (observe behavior)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/records?start_date=2026-05-01&end_date=2026-04-01"
+          }
+        },
+        {
+          "name": "EDGE-16 Records filter valid range + type",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "viewer" }],
+            "url": "{{base_url}}/records?start_date=2026-04-01&end_date=2026-04-30&type=income"
+          }
+        },
+        {
+          "name": "EDGE-17 Delete existing record (if exists)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "role", "value": "admin" }],
+            "url": "{{base_url}}/records/{{record_id}}"
+          }
+        },
+        {
+          "name": "EDGE-18 Delete same record again -> 404",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "role", "value": "admin" }],
+            "url": "{{base_url}}/records/{{record_id}}"
+          }
+        },
+        {
+          "name": "EDGE-19 Summary balance as admin",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "admin" }],
+            "url": "{{base_url}}/summary/balance"
+          }
+        },
+        {
+          "name": "EDGE-20 Summary category as analyst",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "role", "value": "analyst" }],
+            "url": "{{base_url}}/summary/category"
+          }
+        }
+      ]
+    }
+  ]
+}
