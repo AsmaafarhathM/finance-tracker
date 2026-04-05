@@ -31,6 +31,7 @@ Backend for a finance dashboard with REST APIs and role-based access control (RB
 - `middleware/`: RBAC + JWT helpers
   - `auth.py`
 - `static/dashboard.html`: optional browser dashboard (calls `/summary/*` and `/records`)
+- `render.yaml`: optional Render Blueprint (web service + env placeholders)
 
 ## Setup
 
@@ -64,6 +65,28 @@ python app.py
 ```
 
 The server listens on `PORT` (default `5000`).
+
+### Production / Render (Gunicorn)
+
+For hosting (e.g. **Render**, Railway, VPS), use **Gunicorn** instead of the Flask dev server:
+
+```bash
+gunicorn app:app --bind 0.0.0.0:${PORT:-5000}
+```
+
+- **`app:app`** means: module `app.py`, Flask variable `app`.
+- **Render** sets `PORT` automatically; use `0.0.0.0` so the process accepts external connections.
+
+Set the same environment variables as in `.env` in the host’s dashboard (`DB_*`, `JWT_SECRET`, etc.).  
+MySQL must be reachable from the internet (managed MySQL elsewhere, or allowlisted IPs) — Render does not ship a managed MySQL addon; use an external DB or migrate to PostgreSQL if you prefer Render’s native database.
+
+### Deploy on Render (quick)
+
+1. Push this repo to GitHub and connect it in [Render](https://render.com) → **New** → **Web Service**.
+2. **Build command:** `pip install -r requirements.txt`
+3. **Start command:** `gunicorn app:app --bind 0.0.0.0:$PORT`
+4. Add environment variables: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` (and optional `JWT_ALGORITHM`).
+5. Optional: use the included [`render.yaml`](render.yaml) for **Blueprint** deploy (set secret values in the Render dashboard).
 
 ### Web dashboard (optional UI)
 
